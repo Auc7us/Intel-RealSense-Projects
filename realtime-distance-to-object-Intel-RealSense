@@ -1,1 +1,55 @@
+"""
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import pyrealsense2 as rs
+#import keras as ks
 
+                                     
+
+pipe = rs.pipeline()
+config = rs.config()
+config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+# other_stream, other_format = rs.stream.infrared, rs.format.y8
+other_stream, other_format = rs.stream.color, rs.format.rgb8
+config.enable_stream(other_stream, 640, 480, other_format, 30)
+
+pipe.start(config)
+
+#skip 5 frames so exposure can auto adjust
+for x in range(5):
+  pipe.wait_for_frames()
+
+frameset = pipe.wait_for_frames()
+color_frame = frameset.get_color_frame()
+depth_frame = frameset.get_depth_frame()
+
+pipe.stop()
+print("frames captured")
+
+color = np.asanyarray(color_frame.get_data())
+plt.rcParams["axes.grid"] = False
+plt.rcParams["figure.figsize"] = [12,6]
+#plt.imshow(color)
+
+colorizer = rs.colorizer()
+colorizedDepth = np.asanyarray(colorizer.colorize(depth_frame).get_data())
+#plt.imshow(colorizedDepth)
+
+align = rs.align(rs.stream.color)
+frameset = align.process(frameset)
+
+aligned_depth_frame = frameset.get_depth_frame()
+ 
+colorized_depth = np.asanyarray(colorizer.colorize(aligned_depth_frame).get_data())
+
+images = np.stack((color, colorized_depth))
+
+f = plt.figure()
+f.add_subplot(1,2, 1)
+plt.imshow(color)
+f.add_subplot(1,2, 2)
+plt.imshow(colorized_depth)
+plt.show(block=True)
+#plt.imshow(color)
+#plt.imshow(colorizedDepth)
