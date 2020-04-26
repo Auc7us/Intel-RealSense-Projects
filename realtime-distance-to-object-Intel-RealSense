@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 import pyrealsense2 as rs
 #import keras as ks
 
-                                     
-
 pipe = rs.pipeline()
 config = rs.config()
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
