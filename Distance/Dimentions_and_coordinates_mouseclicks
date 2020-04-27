@@ -173,7 +173,7 @@ if key == (27, ord("q")):
 #print("scale height is \n",scale_height)
 
 zFinal = (depthZ1+depthZ2)/2
-x_pixel_from_center = ((x1+x2)/2)-(window_width/2)
+x_pixel_from_center = ((x1+x2)/2)-(window_height/2)
 y_pixel_from_center = ((y1+y2)/2)-(window_width/2)  
 zFinal = (depthZ1+depthZ2)/2
 
