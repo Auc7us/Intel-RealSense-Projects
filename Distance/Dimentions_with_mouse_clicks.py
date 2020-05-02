@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Updated on Sat May  2 15:54:22 2020
+
+@author: Keshav
+"""
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -72,7 +79,9 @@ plt.show(block=True)
 #while True:
 key = cv2.waitKey(1)
 
-cv2.imwrite('tempImage1.png', cv2.cvtColor(colorized_depth, cv2.COLOR_RGB2BGR))
+#cv2.imwrite('tempImage1.png', cv2.cvtColor(colorized_depth, cv2.COLOR_RGB2BGR)) #Use this to get a selection of points on colorized depth image
+
+cv2.imwrite('tempImage1.png', cv2.cvtColor(color, cv2.COLOR_RGB2BGR))            #Use this to get a selection of points on color image
 
 print('select points and press Enter')
 
@@ -112,24 +121,32 @@ depth_2 = depth[x2,y2].astype(float)
 depthZ1 = depth_1*depth_scale
 depthZ2 = depth_2*depth_scale
 
-print("depth of point 1 is ",depthZ1)
-print('depth of point 2 is ',depthZ2)
+print("\ndepth of point 1 is ",depthZ1,"m")
+print('depth of point 2 is ',depthZ2,"m")
 
-#xScale = depth_scale*((depthZ2-depthZ1)*0.8268367588)
-#yScale = depth_scale*((depthZ2-depthZ1)*0.8268367588)
+#My constants are for 640*480 resolution and not quite accurately calibrated but give good results nevertheless
+#To Calibrate the code for better/more accurate results, do the following:
+#Use the Realsense Depth Quality tool, make sure camera is horizontal and parallel to the wall 
+#Make sure you are pointing at a flat, while wall. Start the On-chip calibration using the option Whitewall 
+#Without disturbing the camera,run this code and measure the lentgh of a known object(ex.30 cm long scale)
+#Select the two ends of the scale using the mouse,as accurately as you can
+#Note down the predicted lenght and depth at which the center of the object is predicted to be
+# k = (Actual length)/((Predicted Length)*(Predicted Depth of the center)) //calculate this constant
+# Final Formula for variable x2 = (k/2)*(((depthZ2-3*depthZ1)*x1)+((depthZ2+depthZ1)*x2))*depthScale // Replace the same values for y2
+#integration was done on the assumption that x and y vary linearly with z (We only find the displacement between the two points) 
 
 
 x2=0.8286085518*(((depthZ2-3*depthZ1)*x1)+((depthZ2+depthZ1)*x2))*0.0010000000474974513
 
 y2=0.8286085518*(((depthZ2-3*depthZ1)*y1)+((depthZ2+depthZ1)*y2))*0.0010000000474974513
 
-print("X222222222  ",x2)
-print("Y222222222  ",y2)
+print("\nX2 is  ",x2) #displacement along x axis in meters
+print("Y2 is  ",y2) #displacement along y axis in meters
 
 x1 = 0
 y1 = 0
 z1 = 0
-z2 = depthZ2-depthZ1
+z2 = depthZ2-depthZ1 #displacement along z axis in meters
 
 print("\n\ndepthScale is ",depth_scale)
 
@@ -139,7 +156,7 @@ coord2 = (x2,y2,z2)
 #textX = (x1+x2)/4
 #textY = ((y1+y2)/4)-25
 
-lengthMeasured = math.sqrt(sum([(a-b)**2 for a,b in zip(coord1,coord2)]))
+lengthMeasured = math.sqrt(sum([(a-b)**2 for a,b in zip(coord1,coord2)])) #L2 norm (euclidean distance)
 
 #cv2.putText(img, lengthMeasured, 
 #            (int(textX), int(textY)),
@@ -148,7 +165,7 @@ lengthMeasured = math.sqrt(sum([(a-b)**2 for a,b in zip(coord1,coord2)]))
 cv2.namedWindow('imageFinal', cv2.WINDOW_NORMAL)
 cv2.resizeWindow('imageFinal', window_width, window_height)
 cv2.imshow('imageFinal',img)
-print("\n\n The Length measured is",lengthMeasured,"\n\n")
+print("\n\n The Length measured is",lengthMeasured,"m\n\n")
 cv2.waitKey(0)
 if key == (27, ord("q")):
     cv2.destroyAllWindows('imageFinal')
