@@ -72,9 +72,8 @@ plt.show(block=True)
 #while True:
 key = cv2.waitKey(1)
 
-cv2.imwrite('tempImage1.png', cv2.cvtColor(colorized_depth, cv2.COLOR_RGB2BGR)) #Use this to get a selection of points on colorized depth image
-
-#cv2.imwrite('tempImage1.png', cv2.cvtColor(color, cv2.COLOR_RGB2BGR))            #Use this to get a selection of points on color image
+#cv2.imwrite('tempImage1.png', cv2.cvtColor(colorized_depth, cv2.COLOR_RGB2BGR)) #Use this to get a selection of points on colorized depth image
+cv2.imwrite('tempImage1.png', cv2.cvtColor(color, cv2.COLOR_RGB2BGR))            #Use this to get a selection of points on color image
 
 print('select points and press Enter')
 
@@ -104,9 +103,19 @@ y2 = left_clicks[1][0]
 x2 = left_clicks[1][1]
 
 #cv2.line(img,(y1,x1),(y2,x2),(0,0,255),2)
+cropped_img = img[x1:x2,y1:y2]
+gray = cv2.cvtColor(cropped_img,cv2.COLOR_BGR2GRAY)
+#gray = np.float32(gray)
+#dst = cv2.cornerHarris(gray,2,3,0.04)
+#dst = cv2.dilate(dst,None)
+#cropped_img[dst>0.01*dst.max()]=[0,0,255]
 
-gray_img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+corners = cv2.goodFeaturesToTrack(gray,25,0.01,10)
+corners = np.int0(corners)
+for i in corners:
+    x,y = i.ravel()
+    cv2.circle(cropped_img,(x,y),3,255,-1)
 
-cropped_img = gray_img[x1:x2,y1:y2]
-edges = cv2.Canny(cropped_img,100,200)
-plt.imshow(edges)
+plt.imshow(cropped_img)
+#edges = cv2.Canny(cropped_img,100,200)
+#plt.imshow(edges)
